@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 import java.util.Scanner;
 
 
@@ -8,24 +9,31 @@ public class JAEVP3 {
 		
 	public static class unionFind{
 		
-		unionFind mainUnion[];
-		int pathLength[];
-		int parent = 0;
-		int key = 0;
+		unionFind mainUnion[] = new unionFind[0];
+		int pathLength[] = new int[0];
+		Integer parent = 1;
+		int key = 1;
+		boolean isRoot = false;
 		
 		
-		
+		public unionFind(int x, int y){
+			
+			this.key = x;
+			this.parent = x;
+			this.isRoot = true;
+			
+		}
 		
 		// creates a union find object for integer elements 0 ... n-1.
 		public unionFind(int n){
 			
 			mainUnion = new unionFind[n];	//Create a new array of unionNodes.
 			pathLength = new int[n];
-			
+			System.out.println(n);
 			for(int i = 0; i < n; i++){
 				
-				mainUnion[i].key = i;	
-				mainUnion[i].parent = i;
+				mainUnion[i] = new unionFind(i,n);	
+				System.out.println(mainUnion[i].key);
 				
 			}
 			
@@ -38,34 +46,44 @@ public class JAEVP3 {
 		// the tree containing y a subtree of the root of the tree containing x.
 		public void union(int x, int y){
 			
-			int firstRoot = this.find(x);
-			int secondRoot = this.find(y);
+			int firstRoot = find(x);
+			int secondRoot = find(y);
+			
+			System.out.println("Value of firstRoot is: " + firstRoot);
+			System.out.println("Value of secondRoot is: " + secondRoot);
 			
 			if(pathLength[firstRoot] > pathLength[secondRoot]){
 				
 				mainUnion[secondRoot].parent = firstRoot;
-				pathLength[firstRoot] = (pathLength[secondRoot] + 1);
+				pathLength[firstRoot] += pathLength[secondRoot] + 1;
+				mainUnion[secondRoot].isRoot = false;
 				
 			}else if(pathLength[secondRoot] > pathLength[firstRoot]){
 				
 				mainUnion[firstRoot].parent = secondRoot;
-				pathLength[secondRoot] = (pathLength[firstRoot] + 1);
+				pathLength[secondRoot] += pathLength[firstRoot] + 1;
+				mainUnion[firstRoot].isRoot = false;
 				
 			}else{
 				
-				mainUnion[firstRoot].parent = secondRoot;
+				mainUnion[secondRoot].parent = firstRoot;
+				mainUnion[secondRoot].isRoot = false;
 				
-				if(pathLength[secondRoot] == 0){
-				
-					pathLength[secondRoot]++;
+				if(pathLength[firstRoot] == 0){
+					
+					pathLength[firstRoot]++;
 				
 				}else{
 					
-					pathLength[secondRoot] = (pathLength[firstRoot] + 1);
+					pathLength[firstRoot] += pathLength[secondRoot] + 1;
 					
 				}
 				
 			}
+			System.out.println("Parent of firstRoot is: " + mainUnion[firstRoot].parent);
+			System.out.println("Parent of secondRoot is: " + mainUnion[secondRoot].parent);
+			System.out.println("pathLength of firstRoot is: " + pathLength[firstRoot]);
+			System.out.println("pathLength of secondRoot is: " + pathLength[secondRoot]);
 			
 			
 			
@@ -73,14 +91,38 @@ public class JAEVP3 {
 		
 		 //Searches for element y and returns the key in the root of the tree containing y. Implements path compression on each find.
 		public int find(int y){
-				
-			int i = mainUnion[y].key;
 			
-			if(i == y){
-				return i;
+			int x = mainUnion.length;
+			int[] temp = new int[x];
+			int i = 0;
+			
+			while(mainUnion[y].parent != null){
+				if(mainUnion[y].isRoot == true){
+					
+					temp[i] = y;
+					
+					for(int k = 0; k < x; k++){
+						
+						if(mainUnion[temp[k]].isRoot == true){
+							break;
+						}else{
+							mainUnion[temp[k]].parent = mainUnion[y].key;
+							System.out.println("Parent of temp is: " + mainUnion[temp[k]].parent);
+						}
+						
+					}
+					
+					return y;
+					
+				}else{
+					temp[i] = y;
+					i++;
+					y = mainUnion[y].parent;
+					
+				}
 			}
-			
-			return mainUnion[y].key = find(i);
+				
+				return 0;
 			
 		}
 			
@@ -88,7 +130,15 @@ public class JAEVP3 {
 		//Returns the number of disjoint sets remaining
 		public int numberOfSets(){
 			
-			return 0;
+			int numOfSets = 0;
+			
+			for(int i = 0; i < pathLength.length; i++){
+				
+				if(mainUnion[i].isRoot == true){
+					numOfSets++;
+				}
+			}
+			return numOfSets;
 			
 		}
 		
@@ -113,7 +163,7 @@ public class JAEVP3 {
 	
 	 public static void main(String[] args) throws FileNotFoundException {
 		 
-		 unionFind newArray = new unionFind(0);
+		 unionFind uf = new unionFind(0);
 	   
 		 
 	        Scanner sc = new Scanner(System.in); 
@@ -138,7 +188,8 @@ public class JAEVP3 {
 		            case "D": {
 		            	
 		            	int x = Integer.parseInt(tokens[1]);
-		            	newArray = new unionFind(x);
+		            	uf = new unionFind(x);
+		            	break;
 		            	
 		            }
 		            
@@ -148,7 +199,9 @@ public class JAEVP3 {
 		            	int x = Integer.parseInt(tokens[1]);
 		            	int y = Integer.parseInt(tokens[2]);
 		            	
-		               newArray.union(x, y);
+		               uf.union(x, y);
+		          
+		               break;
 		            	
 		            }
 		            
