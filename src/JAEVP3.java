@@ -9,35 +9,24 @@ public class JAEVP3 {
 		
 	public static class unionFind{
 		
-		unionFind mainUnion[] = new unionFind[0];
+		int mainUnion[] = new int[0];
 		int pathLength[] = new int[0];
-		Integer parent = 1;
-		int key = 1;
-		boolean isRoot = false;
 		
-		
-		public unionFind(int x, int y){
-			
-			this.key = x;
-			this.parent = x;
-			this.isRoot = true;
-			
-		}
 		
 		// creates a union find object for integer elements 0 ... n-1.
 		public unionFind(int n){
 			
-			mainUnion = new unionFind[n];	//Create a new array of unionNodes.
+			mainUnion = new int[n];	//Create a new array of unionNodes.
 			pathLength = new int[n];
-			System.out.println(n);
+		
 			for(int i = 0; i < n; i++){
 				
-				mainUnion[i] = new unionFind(i,n);	
-				System.out.println(mainUnion[i].key);
+				mainUnion[i] = -1;	
+				pathLength[i] = 1;
 				
 			}
 			
-		}
+		}//end of constructor.
 		
 		
 		
@@ -48,83 +37,46 @@ public class JAEVP3 {
 			
 			int firstRoot = find(x);
 			int secondRoot = find(y);
-			
-			System.out.println("Value of firstRoot is: " + firstRoot);
-			System.out.println("Value of secondRoot is: " + secondRoot);
-			
-			if(pathLength[firstRoot] > pathLength[secondRoot]){
-				
-				mainUnion[secondRoot].parent = firstRoot;
-				pathLength[firstRoot] += pathLength[secondRoot] + 1;
-				mainUnion[secondRoot].isRoot = false;
-				
-			}else if(pathLength[secondRoot] > pathLength[firstRoot]){
-				
-				mainUnion[firstRoot].parent = secondRoot;
-				pathLength[secondRoot] += pathLength[firstRoot] + 1;
-				mainUnion[firstRoot].isRoot = false;
-				
-			}else{
-				
-				mainUnion[secondRoot].parent = firstRoot;
-				mainUnion[secondRoot].isRoot = false;
-				
-				if(pathLength[firstRoot] == 0){
+		
+			if(pathLength[secondRoot] > pathLength[firstRoot]){	//If second tree is larger than first, let second be the new root.
 					
-					pathLength[firstRoot]++;
-				
-				}else{
+					mainUnion[firstRoot] = secondRoot;
+					pathLength[secondRoot] += pathLength[firstRoot];
+					System.out.println(secondRoot + " " + pathLength[secondRoot]);
 					
-					pathLength[firstRoot] += pathLength[secondRoot] + 1;
+			}else{	//Else if first tree is larger than second, let first be the new root. (Default case if trees are equal.)
 					
+				if(mainUnion[y] < 0){	//Check if duplicate attempt at a union, do not union again if so.
+						
+					mainUnion[secondRoot] = firstRoot;
+					pathLength[firstRoot] += pathLength[secondRoot];
+						
 				}
+				System.out.println(firstRoot + " " + pathLength[firstRoot]);	
 				
-			}
-			System.out.println("Parent of firstRoot is: " + mainUnion[firstRoot].parent);
-			System.out.println("Parent of secondRoot is: " + mainUnion[secondRoot].parent);
-			System.out.println("pathLength of firstRoot is: " + pathLength[firstRoot]);
-			System.out.println("pathLength of secondRoot is: " + pathLength[secondRoot]);
-			
-			
-			
-		}
+			}			
+	    }//End of union();
 		
 		 //Searches for element y and returns the key in the root of the tree containing y. Implements path compression on each find.
 		public int find(int y){
 			
-			int x = mainUnion.length;
-			int[] temp = new int[x];
-			int i = 0;
+			int k = y;
 			
-			while(mainUnion[y].parent != null){
-				if(mainUnion[y].isRoot == true){
-					
-					temp[i] = y;
-					
-					for(int k = 0; k < x; k++){
-						
-						if(mainUnion[temp[k]].isRoot == true){
-							break;
-						}else{
-							mainUnion[temp[k]].parent = mainUnion[y].key;
-							System.out.println("Parent of temp is: " + mainUnion[temp[k]].parent);
-						}
-						
-					}
-					
-					return y;
-					
-				}else{
-					temp[i] = y;
-					i++;
-					y = mainUnion[y].parent;
-					
-				}
-			}
+			while(mainUnion[k] >= 0){	//While next node is not a root node.
+				k = mainUnion[k];		//Increment to the next node.
+			}	
+			
+			int root = k;	
+			k = y;	//Reset variable to perform path compression.
+			
+			while(mainUnion[k] >= 0){	//While next node is not a root node.
 				
-				return 0;
-			
-		}
+				mainUnion[k] = root;	//Make current node's parent the root node of the tree.
+				k = mainUnion[k];		//Increment to the next node.
+				
+			}
+				return root;			//Return the value of the root.
+		}//End of find();
 			
 		
 		//Returns the number of disjoint sets remaining
@@ -134,27 +86,31 @@ public class JAEVP3 {
 			
 			for(int i = 0; i < pathLength.length; i++){
 				
-				if(mainUnion[i].isRoot == true){
+				if(mainUnion[i] == -1){
 					numOfSets++;
 				}
 			}
 			return numOfSets;
 			
-		}
+		}//End of numberOfSets();
+		
 		
 		//See description below
 		public void printStats(){
 			
+			System.out.printf("%4d", numberOfSets());
 			
-			
-		}
+		}//End of printStats();
+		
 		
 		// prints the array contents in the UnionFind data structure as one line. See the description below.
 		public void printSets(){
 			
+			for(int i = 0; i < mainUnion.length; i++){
+				System.out.print(mainUnion[i] + " ");
+			}
 			
-			
-		}
+		}//End of printSets();
 		
 		
 		
@@ -177,7 +133,7 @@ public class JAEVP3 {
 				switch(tokens[0]) {
 		        
 				    //Case N, returns name.
-		            case "N": {
+		            case "n": {
 		            
 		                System.out.println("Jacob Evans");
 		                break;
@@ -185,7 +141,7 @@ public class JAEVP3 {
 		            }
 		            
 		            //Case D, Create a UnionFind data structure with elements as the input.
-		            case "D": {
+		            case "d": {
 		            	
 		            	int x = Integer.parseInt(tokens[1]);
 		            	uf = new unionFind(x);
@@ -194,57 +150,69 @@ public class JAEVP3 {
 		            }
 		            
 		            //Case U, Call union(input,input), outputs the root value and the size of the resulting tree. 
-		            case "U": {
+		            case "u": {
 		        
 		            	int x = Integer.parseInt(tokens[1]);
 		            	int y = Integer.parseInt(tokens[2]);
 		            	
 		               uf.union(x, y);
-		          
+		    
 		               break;
 		            	
 		            }
 		            
 		            //Case F, Call find(input), outputs the root index. Keep track of the total path length required in all find operations.
-		            case "F":{
+		            case "f":{
 		            	
+		            	int x = Integer.parseInt(tokens[1]);
+		            	int y = 0;
+		            	
+		            	y = uf.find(x);
+		       
+		            	System.out.println(y);
+		            	break;
 		            	
 		            	
 		            }
 		            
 		            //Case P, outputs the array elements in your UnionFind data structure, space separated on one line.
-		            case "P":{
+		            case "p":{
 		            	
+		            	uf.printSets();
 		            	
+		            	break;
 		            	
 		            }
 		            
 		            //Case S, outputs statistics as described below.
-		            case"S":{
+		            case"s":{
 		            	
+		            	uf.printStats();
+		            	
+		            	break;
 		            	
 		            	
 		            }
 		            
 		            //Case M, create a new UnionFind class with elements 0,1,..,(2^3)*(2^3)-1, 
 		            //generate a Torus Maze as described below and print it.
-		            case"M":{
+		            case"m":{
 		            	
 		            	
 		            	
 		            }
 		            
 		            //Case E, sets done to true and exits the program.
-		            case "E": {
+		            case "e": {
 		            	
 		            	done = true;
 		                break;		            	
 		                
 		            }
 		            
-		        } // end of switch
+		        } //End of switch
 
-	        }//end of while
-	  }//end of  main
+	        }//End of while
+	  }//End of  main
 }//End of file
 
