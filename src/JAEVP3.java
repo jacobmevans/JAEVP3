@@ -11,7 +11,8 @@ public class JAEVP3 {
 		
 		int mainUnion[] = new int[0];
 		int pathLength[] = new int[0];
-		
+		int totalPathLength = 0;
+		int numCalls = 0;
 		
 		// creates a union find object for integer elements 0 ... n-1.
 		public unionFind(int n){
@@ -29,7 +30,6 @@ public class JAEVP3 {
 		}//end of constructor.
 		
 		
-		
 	    // forms the union of elements x and y using the union by size strategy.
 		// If the sizes of the trees containing x and y are the same make
 		// the tree containing y a subtree of the root of the tree containing x.
@@ -38,32 +38,45 @@ public class JAEVP3 {
 			int firstRoot = find(x);
 			int secondRoot = find(y);
 		
-			if(pathLength[secondRoot] > pathLength[firstRoot]){	//If second tree is larger than first, let second be the new root.
+			if(mainUnion[secondRoot] < mainUnion[firstRoot]){	//If second tree is larger than first, let second be the new root.
 					
+					mainUnion[secondRoot] += mainUnion[firstRoot];
 					mainUnion[firstRoot] = secondRoot;
-					pathLength[secondRoot] += pathLength[firstRoot];
-					System.out.println(secondRoot + " " + pathLength[secondRoot]);
+					System.out.println(secondRoot + " " + (-mainUnion[secondRoot]));
 					
 			}else{	//Else if first tree is larger than second, let first be the new root. (Default case if trees are equal.)
 					
-				if(mainUnion[y] < 0){	//Check if duplicate attempt at a union, do not union again if so.
-						
+				if(secondRoot != firstRoot){	//Check if duplicate attempt at a union, do not union again if so.
+					
+					mainUnion[firstRoot] += mainUnion[secondRoot];
 					mainUnion[secondRoot] = firstRoot;
-					pathLength[firstRoot] += pathLength[secondRoot];
-						
+				
 				}
-				System.out.println(firstRoot + " " + pathLength[firstRoot]);	
+				System.out.println(firstRoot + " " + (-mainUnion[firstRoot]));	
 				
 			}			
 	    }//End of union();
 		
+		public boolean alreadyConnected(int x, int y){
+			
+			
+			
+			
+			return false;
+			
+		}//End of alreadyConnected();
+		
 		 //Searches for element y and returns the key in the root of the tree containing y. Implements path compression on each find.
 		public int find(int y){
 			
+			totalPathLength++;
+			numCalls++;
 			int k = y;
 			
 			while(mainUnion[k] >= 0){	//While next node is not a root node.
+				
 				k = mainUnion[k];		//Increment to the next node.
+				totalPathLength++;
 			}	
 			
 			int root = k;	
@@ -84,9 +97,9 @@ public class JAEVP3 {
 			
 			int numOfSets = 0;
 			
-			for(int i = 0; i < pathLength.length; i++){
+			for(int i = 0; i < mainUnion.length; i++){
 				
-				if(mainUnion[i] == -1){
+				if(mainUnion[i] <= -1){
 					numOfSets++;
 				}
 			}
@@ -95,10 +108,26 @@ public class JAEVP3 {
 		}//End of numberOfSets();
 		
 		
+		public double calcAverage(){
+			
+			double avg = 0;
+			
+			avg = (double)totalPathLength/(double)numCalls;
+			return avg;
+			
+		}//End of calcAverage();
+		
 		//See description below
 		public void printStats(){
 			
-			System.out.printf("%4d", numberOfSets());
+			System.out.println();
+			System.out.print("Number of sets remaining = ");
+			System.out.printf("%4d",numberOfSets());
+			System.out.println();
+			System.out.print("Mean path length in find  = ");
+			System.out.printf("%6.2f",calcAverage());
+			System.out.println();
+			
 			
 		}//End of printStats();
 		
@@ -123,7 +152,7 @@ public class JAEVP3 {
 	   
 		 
 	        Scanner sc = new Scanner(System.in); 
-	        //Scanner sc = new Scanner(new File("C:/Users/Jake/workspace/JAEVP2/p2in4.txt"));
+	        //Scanner sc = new Scanner(new File("E:/JakeEclipse/JAEVP3/src/test.txt"));
 	        String line = "";
 	        boolean done = false;
 	        
@@ -135,7 +164,7 @@ public class JAEVP3 {
 				    //Case N, returns name.
 		            case "n": {
 		            
-		                System.out.println("Jacob Evans");
+		                System.out.println("JAEVP3.java");
 		                break;
 		                
 		            }
