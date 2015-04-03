@@ -11,7 +11,6 @@ public class JAEVP3 {
 	public static class unionFind{
 		
 		int mainUnion[] = new int[0];
-		int pathLength[] = new int[0];
 		int totalPathLength = 0;
 		int numCalls = 0;
 		
@@ -19,12 +18,10 @@ public class JAEVP3 {
 		public unionFind(int n){
 			
 			mainUnion = new int[n];	//Create a new array of unionNodes.
-			pathLength = new int[n];
-		
+				
 			for(int i = 0; i < n; i++){
 				
-				mainUnion[i] = -1;	
-				pathLength[i] = 1;
+				mainUnion[i] = -1;
 				
 			}
 		}//end of constructor.
@@ -64,15 +61,7 @@ public class JAEVP3 {
 			}			
 	    }//End of union();
 		
-		public boolean alreadyConnected(int x, int y){
 			
-			
-			
-			
-			return false;
-			
-		}//End of alreadyConnected();
-		
 		 //Searches for element y and returns the key in the root of the tree containing y. Implements path compression on each find.
 		public int find(int y){
 			
@@ -152,6 +141,7 @@ public class JAEVP3 {
 		public int calcDim(){ 
 			
 			int dim = (int)Math.sqrt(mainUnion.length);
+			System.out.println(dim);
 			return dim;
 			
 		}
@@ -167,62 +157,98 @@ public class JAEVP3 {
 		
 		
 		public int genRand(int dim){
-			
-			Random ran = new Random();
-			int rand = ran.nextInt(dim + 1);
+
+			Random ran = new Random();	
+			int rand = ran.nextInt(dim * dim);
 			return rand;
 			
 		}
 		
 		
-		public boolean isEdge(int e, int dim){
+		public int determineOutEdge(int e, int dim){
 			
 			int lowerBound = dim * (dim - 1);
 			int upperBound = (dim * (dim - 1)) + (dim - 1);
 			
 			if(e >= 0 && e <= (dim-1)){	//If top outside edge.
-				return true;
-			}else if((e % dim) == 0){	//If left outside edge.
-				return true;
-			}else if(((e + 1) % dim) == 0){	//If right outside edge.
-				return true;
+				return 1;
 			}else if(e >= lowerBound && e <= upperBound){	//If bottom outside edge.
-				return true;
+				return 2;
+			}else if((e % dim) == 0){	//If left outside edge.
+				return 3;
+			}else if(((e + 1) % dim) == 0){	//If right outside edge.
+				return 4;
 			}
 			
-			
-			return false;
+			return 0;
 		}
 		
 		
 		public void generateMaze(){
 			
 			int dim = calcDim();	//Variable to be used in calculations.
-			
+			int temp = 0;
 			while(numberOfSets() != 1){
 				
 				int rand = genRand();	//Random number for edge.
 				int ran = genRand(dim);	//Random number for vertex.
-				boolean isOutEdge = isEdge(ran, dim);	//Variable to check if edge is outer. 
-				
+				int isOutEdge = determineOutEdge(ran, dim);	//Variable to check if edge is outer. 
+				System.out.println("Random is: " + ran);
+				System.out.println("Random direction is: " + rand);
+				System.out.println("Is out edge is: " + isOutEdge);
 				if(rand == 0){	//Generate a left edge.
-					if(isOutEdge){
+					if(isOutEdge == 3 || ran == 0 || ran == dim*(dim - 1)){
 						
-						int temp = ran + (ran - 1);
+						temp = ran + (dim - 1);
 						union(ran,temp);
 						
 					}else{
-						
-						union(ran,(ran - 1));
-						
+						temp = ran - 1;
+						System.out.println(temp);
+						union(ran,temp);
 					}
 				}else if(rand == 1){	//Generate a right edge.
-					
+					if(isOutEdge == 4 || ran == (dim - 1) || ran == (dim * dim) - 1){
+						
+						temp = ran - (dim - 1);
+						union(ran,temp);
+						
+					}else{
+						temp = ran + 1;
+						union(ran,temp);
+					}
 				}else if(rand == 2){	//Generate an up edge.
-					
+					if(isOutEdge == 1){
+						
+						temp = ran + (dim * (dim - 1));
+						System.out.println(temp);
+						union(ran,temp);
+						
+					}else{
+						temp = ran - dim;
+						union(ran,temp);
+					}
 				}else if(rand == 3){	//Generate a down edge.
-					
+					if(isOutEdge == 2){
+						
+						temp = ran - (dim * (dim - 1));
+						union(ran,temp);
+						
+					}else{
+						temp = ran + dim;
+						union(ran,temp);
+					}
 				}
+			}
+		}
+		
+		
+		public void printMaze(){
+			
+			for(int i = 0; i < mainUnion.length; i ++){
+				
+			System.out.print((-mainUnion[i]));	
+			
 			}
 		}
 		
@@ -313,11 +339,12 @@ public class JAEVP3 {
 		            	double x = Integer.parseInt(tokens[1]);
 		            	int y = Integer.parseInt(tokens[2]);
 		            	
-		            	x = Math.pow(2, x) * Math.pow(2, x) - 1;
-		            	
+		            	x = Math.pow(2, x) * Math.pow(2, x);
+		            	System.out.println(x);
 		            	uf.reset();
 		            	uf = new unionFind((int)x);
 		            	uf.generateMaze();
+		            	uf.printMaze();
 		            	
 		            	
 		            }
