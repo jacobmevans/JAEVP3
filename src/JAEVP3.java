@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -26,8 +27,14 @@ public class JAEVP3 {
 				pathLength[i] = 1;
 				
 			}
-			
 		}//end of constructor.
+		
+		public void reset(){
+			
+			totalPathLength = 0;
+			numCalls = 0;
+			
+		}
 		
 		
 	    // forms the union of elements x and y using the union by size strategy.
@@ -119,7 +126,7 @@ public class JAEVP3 {
 		
 		//See description below
 		public void printStats(){
-			
+			//FIX THIS SHIT
 			System.out.println();
 			System.out.print("Number of sets remaining = ");
 			System.out.printf("%4d",numberOfSets());
@@ -142,6 +149,82 @@ public class JAEVP3 {
 		}//End of printSets();
 		
 		
+		public int calcDim(){ 
+			
+			int dim = (int)Math.sqrt(mainUnion.length);
+			return dim;
+			
+		}
+		
+		
+		public int genRand(){
+			
+			Random ran = new Random();		
+			int rand = ran.nextInt(4);
+			return rand;
+			
+		}
+		
+		
+		public int genRand(int dim){
+			
+			Random ran = new Random();
+			int rand = ran.nextInt(dim + 1);
+			return rand;
+			
+		}
+		
+		
+		public boolean isEdge(int e, int dim){
+			
+			int lowerBound = dim * (dim - 1);
+			int upperBound = (dim * (dim - 1)) + (dim - 1);
+			
+			if(e >= 0 && e <= (dim-1)){	//If top outside edge.
+				return true;
+			}else if((e % dim) == 0){	//If left outside edge.
+				return true;
+			}else if(((e + 1) % dim) == 0){	//If right outside edge.
+				return true;
+			}else if(e >= lowerBound && e <= upperBound){	//If bottom outside edge.
+				return true;
+			}
+			
+			
+			return false;
+		}
+		
+		
+		public void generateMaze(){
+			
+			int dim = calcDim();	//Variable to be used in calculations.
+			
+			while(numberOfSets() != 1){
+				
+				int rand = genRand();	//Random number for edge.
+				int ran = genRand(dim);	//Random number for vertex.
+				boolean isOutEdge = isEdge(ran, dim);	//Variable to check if edge is outer. 
+				
+				if(rand == 0){	//Generate a left edge.
+					if(isOutEdge){
+						
+						int temp = ran + (ran - 1);
+						union(ran,temp);
+						
+					}else{
+						
+						union(ran,(ran - 1));
+						
+					}
+				}else if(rand == 1){	//Generate a right edge.
+					
+				}else if(rand == 2){	//Generate an up edge.
+					
+				}else if(rand == 3){	//Generate a down edge.
+					
+				}
+			}
+		}
 		
 		
 	}//End of Union	
@@ -151,8 +234,8 @@ public class JAEVP3 {
 		 unionFind uf = new unionFind(0);
 	   
 		 
-	        Scanner sc = new Scanner(System.in); 
-	        //Scanner sc = new Scanner(new File("E:/JakeEclipse/JAEVP3/src/test.txt"));
+	        //Scanner sc = new Scanner(System.in); 
+	        Scanner sc = new Scanner(new File("C:/users/jake/workspace/JAEVP3/src/test.txt"));
 	        String line = "";
 	        boolean done = false;
 	        
@@ -227,6 +310,14 @@ public class JAEVP3 {
 		            //generate a Torus Maze as described below and print it.
 		            case"m":{
 		            	
+		            	double x = Integer.parseInt(tokens[1]);
+		            	int y = Integer.parseInt(tokens[2]);
+		            	
+		            	x = Math.pow(2, x) * Math.pow(2, x) - 1;
+		            	
+		            	uf.reset();
+		            	uf = new unionFind((int)x);
+		            	uf.generateMaze();
 		            	
 		            	
 		            }
